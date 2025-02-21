@@ -1,6 +1,8 @@
 ARG BUILD_FROM
 FROM ${BUILD_FROM}
 
+LABEL org.opencontainers.image.source=https://github.com/alexmoras/hass-addon-newt
+
 # Set shell
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
