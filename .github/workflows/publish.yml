@@ -22,5 +22,5 @@ jobs:
         with:
           args: |
             --all \
-            --target addon-folder \
-            --docker-hub user-name-or-space-name
+            --target newt \
+            --docker-hub ghcr.io/alexmoras
