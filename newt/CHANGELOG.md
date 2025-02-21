@@ -6,9 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+Updates to the repository without changes to the client or code will not be classed as a new release, to prevent unnecessary updates within Home Assistant.
 
 ### Fixed
 - DOCS.md URL in README.md has been fixed.
+- README.md updated to clarify that this project builds on the back of the hard work of the team at Fossorial and is not endorsed by them.
 
 ## [0.2.0] - 2025-02-08
 
