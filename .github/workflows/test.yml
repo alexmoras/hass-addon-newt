@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v3
-      - name: Publish
+      - name: Test
         uses: home-assistant/builder@master
         with:
           args: |
