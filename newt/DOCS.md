@@ -11,7 +11,7 @@ Create a new "Site" with `Newt` as the Method. Save the `id`, `secret`, and `end
 
 ## Installation
 1. Add this repository to Home Assistant and install the addon.  
-   [![Open your Home Assistant instance and show the add add-on repository dialog with a specific repository URL pre-filled.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Falexmoras%2Fhass-addon-newt)
+   [![Open your Home Assistant instance and show the add add-on repository dialog with a specific repository URL pre-filled.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2FAdriaanConijn%2Fhass-addon-newt)
 2. Configure the addon in the "Configuration" tab using the configuration documentation below. Hit "Start" and check the "Logs" tab to check the status. On your Pangolin dashboard, you will see the newly created Site status change to "Online".
 3. Visit your Pangolin dashboard and add a new Resource called `Home Assistant`. Choose the correct site that relates to the Home Assistant Newt instance, that you defined in the prerequisites and give your Resource a subdomain.
 4. Make sure the "Enable SSL" option is toggled on, so that you get an automatically generated SSL certificate to encrypt the browser connections.

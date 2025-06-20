@@ -1,13 +1,13 @@
 ARG BUILD_FROM
 FROM $BUILD_FROM
 
-LABEL org.opencontainers.image.source=https://github.com/alexmoras/hass-addon-newt
+LABEL org.opencontainers.image.source=https://github.com/AdriaanConijn/hass-addon-newt
 
 # Set shell
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Setup base
-ARG NEWT_VERSION="1.1.3"
+ARG NEWT_VERSION="1.2.1"
 ARG BUILD_ARCH
 RUN \
     if [ "$BUILD_ARCH" = "aarch64" ]; then \

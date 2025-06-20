@@ -15,7 +15,7 @@ jobs:
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
-          username: alexmoras
+          username: AdriaanConijn
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish
         uses: home-assistant/builder@master
@@ -23,4 +23,4 @@ jobs:
           args: |
             --all \
             --target newt \
-            --docker-hub ghcr.io/alexmoras
+            --docker-hub ghcr.io/AdriaanConijn
