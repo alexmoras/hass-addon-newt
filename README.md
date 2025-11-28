@@ -9,3 +9,5 @@ Newt is the main client, connecting to Pangolin, allowing access to services on 
 [![Add this addon to Home Assistant](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Falexmoras%2Fhass-addon-newt)
 
 This is a Home Assistant add-on that downloads the Newt binary and runs it on your Home Assistant instance. It exposes the ID, Secret, and Endpoint URL as configuration options within Home Assistant for easy deployment. Visit [the docs](https://github.com/alexmoras/hass-addon-newt/blob/main/newt/DOCS.md) to learn how to install it.
+
+_The code for DNS, mTLS, and Log Level is taken from the work done by [adriaanConjin](https://github.com/adriaanConijn/hass-addon-newt)._
