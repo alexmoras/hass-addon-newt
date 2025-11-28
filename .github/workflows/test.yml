@@ -1,7 +1,6 @@
 name: "Test"
 
 on:
-  push:
   pull_request:
     types:
       - opened
@@ -19,6 +18,7 @@ jobs:
         uses: home-assistant/builder@master
         with:
           args: |
-            --all \
+            --amd64 \
+            --aarch64 \
             --target newt \
             --test

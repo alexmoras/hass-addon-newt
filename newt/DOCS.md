@@ -31,3 +31,20 @@ The `secret` given by the Pangolin server. It is the unique string after `--secr
 
 ### - Option: `endpoint`
 The `endpoint` of the Pangolin server. It is the URL after `--endpoint` in the creation wizard. Paste it here including the `https://` bit. This URL must be accessible by the Home Assistant instance - it is normally a domain that can be accessed by the wider internet.
+
+### - Option: `dns`
+
+If your pangolin server does not have a publicly registered dns entry, enter your custom dns server here. This is optional.
+
+### - Option `tls-client-cert`
+
+If you use mutual TLS authentication with your pangolin server, enter the path to the certificate here. You can use the [File Editor add-on](https://www.home-assistant.io/common-tasks/os/#installing-and-using-the-file-editor-add-on) to upload your certificate.
+See the [newt docs on mTLS](https://github.com/fosrl/newt#mtls) for more info.
+
+### - Option `log-level`
+
+The log level to use. In case you want less logging, or need more logging in order to debug.
+
+### - Option `docker`
+
+Enable monitoring of the Docker socket.
