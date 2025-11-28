@@ -19,14 +19,14 @@ options:
   secret: null
   endpoint: null
   dns: ""
-  log-level: "INFO"
-  tls-client-cert: ""
+  log_level: "INFO"
+  tls_client_cert: ""
   docker: false
 schema:
   id: str
   secret: str
   endpoint: str
   dns: str?
-  log-level: list(DEBUG|INFO|NOTICE|WARN|ERROR)
-  tls-client-cert: str?
-  docker: bool
+  log_level: list(DEBUG|INFO|NOTICE|WARN|ERROR)?
+  tls_client_cert: str?
+  docker: bool?
