@@ -18,9 +18,9 @@ options:
   id: null
   secret: null
   endpoint: null
-  dns: null
+  dns: ""
   log-level: "INFO"
-  tls-client-cert: null
+  tls-client-cert: ""
   docker: false
 schema:
   id: str
