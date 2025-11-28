@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.6.0] - 2025-11-28
 
 ### Added
-- Implement work by [adriaanConjin](https://github.com/adriaanConijn/hass-addon-newt) to include mTLS, DNS, and Log Level support.
+- Implement work by [adriaanConijn](https://github.com/adriaanConijn/hass-addon-newt) to include mTLS, DNS, and Log Level support.
 - Implement Docker socket support.
 
 ### Changed
