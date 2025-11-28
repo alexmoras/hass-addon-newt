@@ -47,4 +47,4 @@ The log level to use. In case you want less logging, or need more logging in ord
 
 ### - Option `docker`
 
-Enable monitoring of the Docker socket.
+Allow Newt to access the Docker socket. **You must disable "Protection mode" from the main addon page.**
