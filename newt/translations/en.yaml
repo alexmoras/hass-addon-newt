@@ -20,4 +20,4 @@ configuration:
     description: The log level to use. Defaults to INFO.
   docker:
     name: Docker API access
-    description: Allow Newt to access the Docker API.
+    description: Allow Newt to access the Docker socket. **You must disable "Protection mode" from the main addon page.**
