@@ -1,10 +1,10 @@
 name: "Newt - Pangolin Tunnels"
 description: "Secure remote access with Pangolin tunnels."
-maintainer: Alex Moras <alex@codesix.net>
+maintainer: phil-lipp
 url: https://docs.fossorial.io
-version: "0.7.0"
+version: "1.9.0-1"
 slug: "newt"
-image: "ghcr.io/alexmoras/image-{arch}-hass-addon-newt"
+image: "ghcr.io/phil-lipp/{arch}-newt"
 boot: auto
 init: false
 arch:

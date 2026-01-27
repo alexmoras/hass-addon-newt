@@ -5,7 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [07.0 - 2025-12-13
+## [1.9.0-1] - 2026-01-24
+
+### Changed
+- Newt version bumped to 1.9.0. Adds support for olm low power mode in sub packages and iOS/Android clients with rebind support.
+- Adapt versioning to follow Newt's versioning scheme (add-on version now tracks Newt version)
+- Fully fork
+
+## [0.7.0] - 2025-12-13
 
 ### Changed
 - Newt version bumped to 1.7.0 (thanks @phil-lipp), necessary for support on new versions of Pangolin.

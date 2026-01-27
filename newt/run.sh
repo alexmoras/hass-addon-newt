@@ -2,26 +2,26 @@
 # shellcheck shell=bash
 set -e
 
-bashio::log.info "Starting Newt..."
+bashio.log.info "Starting Newt..."
 
 # Build command arguments
 ARGS=(
-    "--id" "$(bashio::config 'id')"
-    "--secret" "$(bashio::config 'secret')"
-    "--endpoint" "$(bashio::config 'endpoint')"
-    "--log-level" "$(bashio::config 'log_level')"
+    "--id" "$(bashio.config 'id')"
+    "--secret" "$(bashio.config 'secret')"
+    "--endpoint" "$(bashio.config 'endpoint')"
+    "--log-level" "$(bashio.config 'log_level')"
 )
 
 # Add DNS if configured
-if bashio::config.has_value 'dns' && [ -n "$(bashio::config 'dns')" ]; then
-    ARGS+=("--dns" "$(bashio::config 'dns')")
+if bashio.config.has_value 'dns' && [ -n "$(bashio.config 'dns')" ]; then
+    ARGS+=("--dns" "$(bashio.config 'dns')")
 fi
 
-if bashio::config.has_value 'tls_client_cert' && [ -n "$(bashio::config 'tls_client_cert')" ]; then
-    ARGS+=("--tls-client-cert" "$(bashio::config 'tls_client_cert')")
+if bashio.config.has_value 'tls_client_cert' && [ -n "$(bashio.config 'tls_client_cert')" ]; then
+    ARGS+=("--tls-client-cert" "$(bashio.config 'tls_client_cert')")
 fi
 
-if bashio::config.has_value 'docker' && [ "$(bashio::config 'docker')" = "true" ]; then
+if bashio.config.has_value 'docker' && [ "$(bashio.config 'docker')" = "true" ]; then
     ARGS+=("--docker-socket" "/var/run/docker.sock")
 fi
 
