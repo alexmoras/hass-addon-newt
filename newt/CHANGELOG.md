@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.18.1 - 2026-10-15]
+### Changed
+- Newt version bumped to 1.18.1.
+
+## [1.17.0 - 2026-10-01]
+### Changed
+- Newt version bumped to 1.17.0.
+
+## [1.16.0 - 2026-09-10]
+### Changed
+- Newt version bumped to 1.16.0.
+
+## [1.15.0 - 2026-08-06]
+### Changed
+- Newt version bumped to 1.15.0.
+
+## [1.14.0 - 2026-07-23]
+### Changed
+- Newt version bumped to 1.14.0.
+
+## [1.13.0 - 2026-06-12]
+### Changed
+- Newt version bumped to 1.13.0.
+
+## [1.12.5 - 2026-05-14]
+### Changed
+- Newt version bumped to 1.12.5.
+
 ## [1.12.3] - 2026-04-30
 ### Changed
 - Newt version bumped to 1.12.3

@@ -1,0 +1,169 @@
+name: "Search for Newt updates"
+
+on:
+  schedule:
+    - cron: '0 18 * * 4'
+  workflow_dispatch:
+    inputs:
+      ignore_age:
+        description: 'Ignore 15-day stable age requirement (update immediately)'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.create_release.outputs.release_created }}
+      version: ${{ steps.create_release.outputs.version }}
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v5
+
+      - name: Determine latest stable Newt version
+        id: fetch_stable_version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Fetching recent releases from fosrl/newt..."
+          RELEASES_JSON=$(gh api -X GET repos/fosrl/newt/releases -f per_page=15 | jq 'map(select(.prerelease == false and .draft == false))')
+
+          CURRENT_TIMESTAMP=$(date +%s)
+          TARGET_VERSION=""
+
+          IGNORE_AGE="${{ github.event.inputs.ignore_age }}"
+          
+          if [ "$IGNORE_AGE" = "true" ]; then
+              echo "Evaluating release dates to find the newest series (ignoring 15-day age requirement)..."
+          else
+              echo "Evaluating release dates to find a stable series (15+ days old)..."
+          fi
+          TAGS=$(echo "$RELEASES_JSON" | jq -r '.[].tag_name')
+
+          for TAG in $TAGS; do
+              VERSION=${TAG#v}
+              MAJOR_MINOR=$(echo "$VERSION" | grep -oE '^[0-9]+\.[0-9]+')
+              
+              if [ -z "$MAJOR_MINOR" ]; then
+                  continue
+              fi
+              
+              if [[ "$TAG" == v* ]]; then
+                  SEARCH_PREFIX="v${MAJOR_MINOR}"
+              else
+                  SEARCH_PREFIX="${MAJOR_MINOR}"
+              fi
+              
+              SERIES_FIRST_PUBLISHED_AT=$(printf '%s' "$RELEASES_JSON" | jq -r --arg prefix "${SEARCH_PREFIX}." --arg exact "${SEARCH_PREFIX}" 'map(select(.tag_name != null and .published_at != null and (.tag_name | startswith($prefix) or . == $exact))) | if length > 0 then min_by(.published_at) | .published_at else empty end')
+              
+              if [ -z "$SERIES_FIRST_PUBLISHED_AT" ] || [ "$SERIES_FIRST_PUBLISHED_AT" = "null" ]; then
+                  continue
+              fi
+              
+              PUBLISHED_TIMESTAMP=$(date -d "$SERIES_FIRST_PUBLISHED_AT" +%s)
+              AGE_DAYS=$(( (CURRENT_TIMESTAMP - PUBLISHED_TIMESTAMP) / 86400 ))
+              
+              if [ "$AGE_DAYS" -ge 15 ] || [ "$IGNORE_AGE" = "true" ]; then
+                  TARGET_VERSION="$VERSION"
+                  echo "Found stable target: $TARGET_VERSION (Series $MAJOR_MINOR is $AGE_DAYS days old)"
+                  break
+              else
+                  echo "Skipping $VERSION (Series $MAJOR_MINOR is only $AGE_DAYS days old)"
+              fi
+          done
+
+          if [ -z "$TARGET_VERSION" ]; then
+              echo "No stable version found in recent releases!"
+              echo "UPDATE_NEEDED=false" >> $GITHUB_ENV
+              exit 0
+          fi
+
+          echo "LATEST_VERSION=$TARGET_VERSION" >> $GITHUB_ENV
+
+      - name: Get current Newt version from repository
+        id: get_current_version
+        if: env.UPDATE_NEEDED != 'false'
+        run: |
+          CURRENT_VERSION=$(grep -E '^version: ' newt/config.yaml | awk -F'"' '{print $2}')
+          echo "Current version in repo is: $CURRENT_VERSION"
+          echo "CURRENT_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
+
+      - name: Compare versions
+        id: check_update_needed
+        if: env.UPDATE_NEEDED != 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Latest stable upstream version: $LATEST_VERSION"
+          echo "Current repository version: $CURRENT_VERSION"
+          
+          echo "Checking for downgrades..."
+          HIGHEST_VERSION=$(printf "%s\n%s" "$LATEST_VERSION" "$CURRENT_VERSION" | sort -V | tail -n1)
+          
+          if [ "$LATEST_VERSION" = "$CURRENT_VERSION" ]; then
+            echo "Version is already up to date ($CURRENT_VERSION). Skipping update."
+            echo "UPDATE_NEEDED=false" >> $GITHUB_ENV
+            echo "update_needed=false" >> $GITHUB_OUTPUT
+          elif [ "$HIGHEST_VERSION" = "$CURRENT_VERSION" ]; then
+            echo "Current version ($CURRENT_VERSION) is newer than the stable target ($LATEST_VERSION). Skipping update."
+            echo "UPDATE_NEEDED=false" >> $GITHUB_ENV
+            echo "update_needed=false" >> $GITHUB_OUTPUT
+          else
+            echo "New version available! Proceeding with update."
+            echo "UPDATE_NEEDED=true" >> $GITHUB_ENV
+            echo "update_needed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update files and Changelog
+        if: env.UPDATE_NEEDED == 'true'
+        run: |
+          sed -i -E 's/^ARG NEWT_VERSION=".*"/ARG NEWT_VERSION="'"${LATEST_VERSION}"'"/' newt/Dockerfile
+          sed -i -E 's/^version: ".*"/version: "'"${LATEST_VERSION}"'"/' newt/config.yaml
+
+          # Add entry to CHANGELOG.md
+          awk -v version="${LATEST_VERSION}" -v date="$(date +%Y-%m-%d)" '
+          1
+          /\[Semantic Versioning\]/ {
+              print ""
+              print "## [" version " - " date "]"
+              print "### Changed"
+              print "- Newt version bumped to " version "."
+          }
+          ' newt/CHANGELOG.md > tmp.md && mv tmp.md newt/CHANGELOG.md
+
+      - name: Commit and push changes
+        if: env.UPDATE_NEEDED == 'true'
+        run: |
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"
+          git add newt/Dockerfile newt/config.yaml newt/CHANGELOG.md
+          git commit -m "bump Newt version to ${LATEST_VERSION}"
+          git push
+
+      - name: Create Release
+        id: create_release
+        if: env.UPDATE_NEEDED == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "v${LATEST_VERSION}" \
+            --title "Release v${LATEST_VERSION}" \
+            --notes "Automated release bumping Newt to version ${LATEST_VERSION}."
+          echo "release_created=true" >> $GITHUB_OUTPUT
+          echo "version=${LATEST_VERSION}" >> $GITHUB_OUTPUT
+
+  trigger-publish:
+    needs: update
+    if: needs.update.outputs.release_created == 'true'
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    uses: ./.github/workflows/publish.yml
+    with:
+      version: ${{ needs.update.outputs.version }}
+    secrets: inherit

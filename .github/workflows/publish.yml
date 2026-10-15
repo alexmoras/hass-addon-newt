@@ -1,27 +1,86 @@
-name: "Publish"
+name: Build
 
 on:
   release:
     types: [published]
+  workflow_call:
+    inputs:
+      version:
+        description: 'The version to build'
+        required: true
+        type: string
+
+env:
+  ARCHITECTURES: '["amd64", "aarch64"]'
+  IMAGE_NAME: newt
+
+permissions:
+  contents: read
 
 jobs:
-  publish:
-    name: Publish
+  init:
+    name: Initialize build
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+      version: ${{ steps.version.outputs.version }}
     steps:
-      - name: Checkout the repository
-        uses: actions/checkout@v3
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
+      - uses: actions/checkout@v5
+
+      - name: Resolve version
+        id: version
+        run: |
+          RAW_VERSION="${{ inputs.version || github.event.release.tag_name }}"
+          echo "version=${RAW_VERSION#v}" >> $GITHUB_OUTPUT
+
+      - name: Get build matrix
+        id: matrix
+        uses: home-assistant/builder/actions/prepare-multi-arch-matrix@master
         with:
-          registry: ghcr.io
-          username: alexmoras
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Publish
-        uses: home-assistant/builder@master
+          architectures: ${{ env.ARCHITECTURES }}
+          image-name: ${{ env.IMAGE_NAME }}
+
+  build:
+    name: Build ${{ matrix.arch }} image
+    needs: init
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read # To check out the code
+      id-token: write # Write needed for Cosign signing (issue OIDC token for signing)
+      packages: write # To push built images to GitHub Container Registry
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.init.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build image
+        uses: home-assistant/builder/actions/build-image@master
         with:
-          args: |
-            --amd64 \
-            --aarch64 \
-            --target newt \
-            --docker-hub ghcr.io/alexmoras
+          arch: ${{ matrix.arch }}
+          container-registry-password: ${{ secrets.GITHUB_TOKEN }}
+          context: newt
+          image: ${{ matrix.image }}
+          image-tags: |
+            ${{ needs.init.outputs.version }}
+            latest
+          push: "true"
+          version: ${{ needs.init.outputs.version }}
+
+  manifest:
+    name: Publish multi-arch manifest
+    needs: [init, build]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # Write needed for Cosign signing (issue OIDC token for signing)
+      packages: write # To push the manifest to GitHub Container Registry
+    steps:
+      - name: Publish multi-arch manifest
+        uses: home-assistant/builder/actions/publish-multi-arch-manifest@master
+        with:
+          architectures: ${{ env.ARCHITECTURES }}
+          container-registry-password: ${{ secrets.GITHUB_TOKEN }}
+          image-name: ${{ env.IMAGE_NAME }}
+          image-tags: |
+            ${{ needs.init.outputs.version }}
+            latest
