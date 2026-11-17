@@ -1,13 +1,13 @@
-ARG BUILD_FROM
+ARG BUILD_FROM=ghcr.io/home-assistant/amd64-base:latest
 FROM $BUILD_FROM
 
-LABEL org.opencontainers.image.source=https://github.com/alexmoras/hass-addon-newt
+LABEL org.opencontainers.image.source=https://github.com/dahamsterbr/hass-addon-newt
 
 # Set shell
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Setup base
-ARG NEWT_VERSION="1.12.3"
+ARG NEWT_VERSION="1.20.0"
 ARG BUILD_ARCH
 RUN \
     if [ "$BUILD_ARCH" = "aarch64" ]; then \

@@ -7,18 +7,55 @@ on:
       - reopened
       - synchronize
 
+env:
+  ARCHITECTURES: '["amd64", "aarch64"]'
+  IMAGE_NAME: newt
+
+permissions:
+  contents: read
+
 jobs:
-  test:
-    name: Test
+  init:
+    name: Initialize build
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
     steps:
-      - name: Checkout the repository
-        uses: actions/checkout@v3
-      - name: Test
-        uses: home-assistant/builder@master
+      - uses: actions/checkout@v5
+
+      - name: Lowercase registry prefix
+        id: registry
+        run: echo "prefix=ghcr.io/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
+      - name: Get build matrix
+        id: matrix
+        uses: home-assistant/builder/actions/prepare-multi-arch-matrix@2026.06.0
         with:
-          args: |
-            --amd64 \
-            --aarch64 \
-            --target newt \
-            --test
+          architectures: ${{ env.ARCHITECTURES }}
+          image-name: ${{ env.IMAGE_NAME }}
+          registry-prefix: ${{ steps.registry.outputs.prefix }}
+
+  build:
+    name: Build ${{ matrix.arch }} image
+    needs: init
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+      packages: read
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.init.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build image
+        uses: home-assistant/builder/actions/build-image@2026.06.0
+        with:
+          arch: ${{ matrix.arch }}
+          build-args: |
+            BUILD_FROM=ghcr.io/home-assistant/${{ matrix.arch }}-base:latest
+          container-registry-password: ${{ secrets.GITHUB_TOKEN }}
+          context: ./newt
+          image: ${{ matrix.image }}
+          push: "false"
+          version: "dev"
